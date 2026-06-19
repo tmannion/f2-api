@@ -1,5 +1,10 @@
+from pathlib import Path
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+
+# Ensure the data directory exists (needed for CI and first-run)
+Path("data").mkdir(exist_ok=True)
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./data/f2.db"
 
