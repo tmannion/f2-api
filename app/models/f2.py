@@ -101,7 +101,9 @@ class Team(Base):
     name: Mapped[str] = mapped_column(String)
     nationality: Mapped[str] = mapped_column(String)
 
-    season_entries: Mapped[list["DriverSeasonEntry"]] = relationship(back_populates="team")
+    season_entries: Mapped[list["DriverSeasonEntry"]] = relationship(
+        back_populates="team"
+    )
     results: Mapped[list["Result"]] = relationship(back_populates="team")
 
 
@@ -112,7 +114,9 @@ class DriverSeasonEntry(Base):
     driver_id: Mapped[int] = mapped_column(ForeignKey("drivers.id"))
     team_id: Mapped[int] = mapped_column(ForeignKey("teams.id"))
     season_id: Mapped[int] = mapped_column(ForeignKey("seasons.id"))
-    from_round: Mapped[Optional[int]] = mapped_column(default=None)  # null = present from round 1
+    from_round: Mapped[Optional[int]] = mapped_column(
+        default=None
+    )  # null = present from round 1
 
     driver: Mapped["Driver"] = relationship(back_populates="season_entries")
     team: Mapped["Team"] = relationship(back_populates="season_entries")
