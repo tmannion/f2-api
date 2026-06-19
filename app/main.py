@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from app.database import engine, Base
 from app import models  # noqa: F401 — ensures models are registered before create_all
-from app.routers import seasons, rounds, sessions, drivers, teams, results
+from app.routers import seasons, rounds, sessions, drivers, teams, results, standings
 
 app = FastAPI(
     title="F2 API",
@@ -20,6 +20,7 @@ app.include_router(sessions.router)
 app.include_router(drivers.router)
 app.include_router(teams.router)
 app.include_router(results.router)
+app.include_router(standings.router)
 
 
 @app.get("/health")

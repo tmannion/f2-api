@@ -1,16 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.f2 import SeasonCreate, SeasonResponse
+from app.schemas.pagination import PaginatedResponse
 from app.crud import f2 as crud
 
 router = APIRouter(prefix="/seasons", tags=["seasons"])
 
 
-@router.get("/", response_model=list[SeasonResponse])
-def list_seasons(db: Session = Depends(get_db)):
-    return crud.get_seasons(db)
+@router.get("/", response_model=PaginatedResponse[SeasonResponse])
+def list_seasons(
+    limit: int = Query(default=20, ge=1, le=100, description="Items per page"),
+    offset: int = Query(default=0, ge=0, description="Number of items to skip"),
+    db: Session = Depends(get_db),
+):
+    items, total = crud.get_seasons(db, limit=limit, offset=offset)
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/{season_id}", response_model=SeasonResponse)

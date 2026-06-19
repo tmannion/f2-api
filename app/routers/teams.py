@@ -1,16 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.f2 import TeamCreate, TeamResponse
+from app.schemas.pagination import PaginatedResponse
 from app.crud import f2 as crud
 
 router = APIRouter(prefix="/teams", tags=["teams"])
 
 
-@router.get("/", response_model=list[TeamResponse])
-def list_teams(db: Session = Depends(get_db)):
-    return crud.get_teams(db)
+@router.get("/", response_model=PaginatedResponse[TeamResponse])
+def list_teams(
+    limit: int = Query(default=20, ge=1, le=100, description="Items per page"),
+    offset: int = Query(default=0, ge=0, description="Number of items to skip"),
+    db: Session = Depends(get_db),
+):
+    items, total = crud.get_teams(db, limit=limit, offset=offset)
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/{team_id}", response_model=TeamResponse)

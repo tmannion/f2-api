@@ -3,17 +3,21 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.f2 import SessionCreate, SessionResponse
+from app.schemas.pagination import PaginatedResponse
 from app.crud import f2 as crud
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 
-@router.get("/", response_model=list[SessionResponse])
+@router.get("/", response_model=PaginatedResponse[SessionResponse])
 def list_sessions(
     round_id: int | None = Query(default=None, description="Filter by round"),
+    limit: int = Query(default=20, ge=1, le=100, description="Items per page"),
+    offset: int = Query(default=0, ge=0, description="Number of items to skip"),
     db: Session = Depends(get_db),
 ):
-    return crud.get_sessions(db, round_id=round_id)
+    items, total = crud.get_sessions(db, round_id=round_id, limit=limit, offset=offset)
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/{session_id}", response_model=SessionResponse)

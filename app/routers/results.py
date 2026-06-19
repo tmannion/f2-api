@@ -3,18 +3,24 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.f2 import ResultCreate, ResultResponse, PenaltyCreate, PenaltyResponse
+from app.schemas.pagination import PaginatedResponse
 from app.crud import f2 as crud
 
 router = APIRouter(prefix="/results", tags=["results"])
 
 
-@router.get("/", response_model=list[ResultResponse])
+@router.get("/", response_model=PaginatedResponse[ResultResponse])
 def list_results(
     session_id: int | None = Query(default=None, description="Filter by session"),
     driver_id: int | None = Query(default=None, description="Filter by driver"),
+    limit: int = Query(default=20, ge=1, le=100, description="Items per page"),
+    offset: int = Query(default=0, ge=0, description="Number of items to skip"),
     db: Session = Depends(get_db),
 ):
-    return crud.get_results(db, session_id=session_id, driver_id=driver_id)
+    items, total = crud.get_results(
+        db, session_id=session_id, driver_id=driver_id, limit=limit, offset=offset
+    )
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/{result_id}", response_model=ResultResponse)
@@ -27,15 +33,12 @@ def get_result(result_id: int, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=ResultResponse, status_code=201)
 def create_result(result_data: ResultCreate, db: Session = Depends(get_db)):
-    # Verify session exists
     session = crud.get_session(db, result_data.session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
-    # Verify driver exists
     driver = crud.get_driver(db, result_data.driver_id)
     if driver is None:
         raise HTTPException(status_code=404, detail="Driver not found")
-    # Verify team exists
     team = crud.get_team(db, result_data.team_id)
     if team is None:
         raise HTTPException(status_code=404, detail="Team not found")
@@ -45,12 +48,20 @@ def create_result(result_data: ResultCreate, db: Session = Depends(get_db)):
 # --- Penalties (nested under results) ---
 
 
-@router.get("/{result_id}/penalties", response_model=list[PenaltyResponse])
-def list_penalties(result_id: int, db: Session = Depends(get_db)):
+@router.get("/{result_id}/penalties", response_model=PaginatedResponse[PenaltyResponse])
+def list_penalties(
+    result_id: int,
+    limit: int = Query(default=20, ge=1, le=100, description="Items per page"),
+    offset: int = Query(default=0, ge=0, description="Number of items to skip"),
+    db: Session = Depends(get_db),
+):
     result = crud.get_result(db, result_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Result not found")
-    return crud.get_penalties(db, result_id=result_id)
+    items, total = crud.get_penalties(
+        db, result_id=result_id, limit=limit, offset=offset
+    )
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.post("/{result_id}/penalties", response_model=PenaltyResponse, status_code=201)

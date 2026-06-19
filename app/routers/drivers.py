@@ -1,16 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.f2 import DriverCreate, DriverResponse
+from app.schemas.pagination import PaginatedResponse
 from app.crud import f2 as crud
 
 router = APIRouter(prefix="/drivers", tags=["drivers"])
 
 
-@router.get("/", response_model=list[DriverResponse])
-def list_drivers(db: Session = Depends(get_db)):
-    return crud.get_drivers(db)
+@router.get("/", response_model=PaginatedResponse[DriverResponse])
+def list_drivers(
+    limit: int = Query(default=20, ge=1, le=100, description="Items per page"),
+    offset: int = Query(default=0, ge=0, description="Number of items to skip"),
+    db: Session = Depends(get_db),
+):
+    items, total = crud.get_drivers(db, limit=limit, offset=offset)
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/{driver_id}", response_model=DriverResponse)
