@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.orm import Session as DBSession
 
 from app.models.f2 import (
@@ -25,8 +26,13 @@ from app.schemas.f2 import (
 # --- Season CRUD ---
 
 
-def get_seasons(db: DBSession) -> list[Season]:
-    return db.query(Season).all()
+def get_seasons(
+    db: DBSession, limit: int = 20, offset: int = 0
+) -> tuple[list[Season], int]:
+    query = db.query(Season).order_by(Season.year)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return items, total
 
 
 def get_season(db: DBSession, season_id: int) -> Season | None:
@@ -48,11 +54,19 @@ def create_season(db: DBSession, season: SeasonCreate) -> Season:
 # --- Round CRUD ---
 
 
-def get_rounds(db: DBSession, season_id: int | None = None) -> list[Round]:
+def get_rounds(
+    db: DBSession,
+    season_id: int | None = None,
+    limit: int = 20,
+    offset: int = 0,
+) -> tuple[list[Round], int]:
     query = db.query(Round)
     if season_id is not None:
         query = query.filter(Round.season_id == season_id)
-    return query.order_by(Round.round_number).all()
+    query = query.order_by(Round.round_number)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return items, total
 
 
 def get_round(db: DBSession, round_id: int) -> Round | None:
@@ -78,11 +92,19 @@ def create_round(db: DBSession, round_data: RoundCreate) -> Round:
 # --- Session CRUD ---
 
 
-def get_sessions(db: DBSession, round_id: int | None = None) -> list[Session]:
+def get_sessions(
+    db: DBSession,
+    round_id: int | None = None,
+    limit: int = 20,
+    offset: int = 0,
+) -> tuple[list[Session], int]:
     query = db.query(Session)
     if round_id is not None:
         query = query.filter(Session.round_id == round_id)
-    return query.order_by(Session.scheduled_at_utc).all()
+    query = query.order_by(Session.scheduled_at_utc)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return items, total
 
 
 def get_session(db: DBSession, session_id: int) -> Session | None:
@@ -106,8 +128,13 @@ def create_session(db: DBSession, session_data: SessionCreate) -> Session:
 # --- Driver CRUD ---
 
 
-def get_drivers(db: DBSession) -> list[Driver]:
-    return db.query(Driver).order_by(Driver.last_name).all()
+def get_drivers(
+    db: DBSession, limit: int = 20, offset: int = 0
+) -> tuple[list[Driver], int]:
+    query = db.query(Driver).order_by(Driver.last_name)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return items, total
 
 
 def get_driver(db: DBSession, driver_id: int) -> Driver | None:
@@ -130,8 +157,13 @@ def create_driver(db: DBSession, driver_data: DriverCreate) -> Driver:
 # --- Team CRUD ---
 
 
-def get_teams(db: DBSession) -> list[Team]:
-    return db.query(Team).order_by(Team.name).all()
+def get_teams(
+    db: DBSession, limit: int = 20, offset: int = 0
+) -> tuple[list[Team], int]:
+    query = db.query(Team).order_by(Team.name)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return items, total
 
 
 def get_team(db: DBSession, team_id: int) -> Team | None:
@@ -153,14 +185,20 @@ def create_team(db: DBSession, team_data: TeamCreate) -> Team:
 
 
 def get_entries(
-    db: DBSession, season_id: int | None = None, driver_id: int | None = None
-) -> list[DriverSeasonEntry]:
+    db: DBSession,
+    season_id: int | None = None,
+    driver_id: int | None = None,
+    limit: int = 20,
+    offset: int = 0,
+) -> tuple[list[DriverSeasonEntry], int]:
     query = db.query(DriverSeasonEntry)
     if season_id is not None:
         query = query.filter(DriverSeasonEntry.season_id == season_id)
     if driver_id is not None:
         query = query.filter(DriverSeasonEntry.driver_id == driver_id)
-    return query.all()
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return items, total
 
 
 def get_entry(db: DBSession, entry_id: int) -> DriverSeasonEntry | None:
@@ -186,14 +224,21 @@ def create_entry(
 
 
 def get_results(
-    db: DBSession, session_id: int | None = None, driver_id: int | None = None
-) -> list[Result]:
+    db: DBSession,
+    session_id: int | None = None,
+    driver_id: int | None = None,
+    limit: int = 20,
+    offset: int = 0,
+) -> tuple[list[Result], int]:
     query = db.query(Result)
     if session_id is not None:
         query = query.filter(Result.session_id == session_id)
     if driver_id is not None:
         query = query.filter(Result.driver_id == driver_id)
-    return query.order_by(Result.finish_position).all()
+    query = query.order_by(Result.finish_position)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return items, total
 
 
 def get_result(db: DBSession, result_id: int) -> Result | None:
@@ -221,11 +266,18 @@ def create_result(db: DBSession, result_data: ResultCreate) -> Result:
 # --- Penalty CRUD ---
 
 
-def get_penalties(db: DBSession, result_id: int | None = None) -> list[Penalty]:
+def get_penalties(
+    db: DBSession,
+    result_id: int | None = None,
+    limit: int = 20,
+    offset: int = 0,
+) -> tuple[list[Penalty], int]:
     query = db.query(Penalty)
     if result_id is not None:
         query = query.filter(Penalty.result_id == result_id)
-    return query.all()
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return items, total
 
 
 def get_penalty(db: DBSession, penalty_id: int) -> Penalty | None:
@@ -243,3 +295,56 @@ def create_penalty(db: DBSession, penalty_data: PenaltyCreate) -> Penalty:
     db.commit()
     db.refresh(db_penalty)
     return db_penalty
+
+
+# --- Standings CRUD ---
+
+
+def get_standings(db: DBSession, season_id: int) -> list[dict]:
+    """Calculate driver standings for a season by aggregating results."""
+    # Get all sessions belonging to rounds in this season
+    season_sessions = (
+        db.query(Session.id)
+        .join(Round, Session.round_id == Round.id)
+        .filter(Round.season_id == season_id)
+        .subquery()
+    )
+
+    # Aggregate points, wins, podiums per driver
+    results = (
+        db.query(
+            Result.driver_id,
+            Driver.first_name,
+            Driver.last_name,
+            Team.name.label("team_name"),
+            func.sum(Result.points).label("points"),
+            func.sum(func.case((Result.finish_position == 1, 1), else_=0)).label(
+                "wins"
+            ),
+            func.sum(func.case((Result.finish_position <= 3, 1), else_=0)).label(
+                "podiums"
+            ),
+        )
+        .join(Driver, Result.driver_id == Driver.id)
+        .join(Team, Result.team_id == Team.id)
+        .filter(Result.session_id.in_(season_sessions))
+        .group_by(Result.driver_id, Driver.first_name, Driver.last_name, Team.name)
+        .order_by(func.sum(Result.points).desc())
+        .all()
+    )
+
+    standings = []
+    for position, row in enumerate(results, start=1):
+        standings.append(
+            {
+                "position": position,
+                "driver_id": row.driver_id,
+                "driver_name": f"{row.first_name} {row.last_name}",
+                "team_name": row.team_name,
+                "points": row.points or 0,
+                "wins": row.wins or 0,
+                "podiums": row.podiums or 0,
+            }
+        )
+
+    return standings
