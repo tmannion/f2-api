@@ -5,7 +5,7 @@ from app import models  # noqa: F401 — ensures models are registered before cr
 app = FastAPI(
     title="F2 API",
     description="Formula 2 standings, schedule, and results",
-    version="0.1.0",
+    version="dev",
 )
 
 # Create all tables on startup

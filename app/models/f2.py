@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey, Enum
+from sqlalchemy import String, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 
@@ -88,7 +88,9 @@ class Driver(Base):
     nationality: Mapped[str] = mapped_column(String)
     number: Mapped[int] = mapped_column()
 
-    season_entries: Mapped[list["DriverSeasonEntry"]] = relationship(back_populates="driver")
+    season_entries: Mapped[list["DriverSeasonEntry"]] = relationship(
+        back_populates="driver"
+    )
     results: Mapped[list["Result"]] = relationship(back_populates="driver")
 
 
@@ -99,7 +101,9 @@ class Team(Base):
     name: Mapped[str] = mapped_column(String)
     nationality: Mapped[str] = mapped_column(String)
 
-    season_entries: Mapped[list["DriverSeasonEntry"]] = relationship(back_populates="team")
+    season_entries: Mapped[list["DriverSeasonEntry"]] = relationship(
+        back_populates="team"
+    )
     results: Mapped[list["Result"]] = relationship(back_populates="team")
 
 
@@ -110,7 +114,9 @@ class DriverSeasonEntry(Base):
     driver_id: Mapped[int] = mapped_column(ForeignKey("drivers.id"))
     team_id: Mapped[int] = mapped_column(ForeignKey("teams.id"))
     season_id: Mapped[int] = mapped_column(ForeignKey("seasons.id"))
-    from_round: Mapped[Optional[int]] = mapped_column(default=None)  # null = present from round 1
+    from_round: Mapped[Optional[int]] = mapped_column(
+        default=None
+    )  # null = present from round 1
 
     driver: Mapped["Driver"] = relationship(back_populates="season_entries")
     team: Mapped["Team"] = relationship(back_populates="season_entries")
@@ -129,7 +135,9 @@ class Result(Base):
     status: Mapped[ResultStatus] = mapped_column(Enum(ResultStatus))
     points: Mapped[int] = mapped_column(default=0)
     has_fastest_lap: Mapped[bool] = mapped_column(default=False)
-    fastest_lap_time: Mapped[Optional[str]] = mapped_column(String, default=None)  # e.g. "1:27.452"
+    fastest_lap_time: Mapped[Optional[str]] = mapped_column(
+        String, default=None
+    )  # e.g. "1:27.452"
 
     session: Mapped["Session"] = relationship(back_populates="results")
     driver: Mapped["Driver"] = relationship(back_populates="results")
