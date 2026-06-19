@@ -29,6 +29,21 @@ jobs:
       - name: Run ruff formatter check
         run: ruff format --check .
 
+      - name: Generate ruff fix patch
+        if: failure()
+        run: |
+          ruff check --fix --unsafe-fixes . || true
+          ruff format .
+          git diff > ruff.patch
+
+      - name: Upload ruff patch
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-patch
+          path: ruff.patch
+          retention-days: 7
+
   smoke-test:
     name: Smoke Test
     runs-on: ubuntu-latest
