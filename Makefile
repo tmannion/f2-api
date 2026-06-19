@@ -10,3 +10,9 @@ run:
 	
 test:
 	python -m pytest -q
+
+ruff-check:
+	./venv/bin/ruff check . --fix
+
+ruff-format:
+	./venv/bin/ruff format .
