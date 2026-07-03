@@ -13,6 +13,8 @@ class SessionType(enum.Enum):
     PRACTICE_2 = "PRACTICE_2"
     QUALIFYING = "QUALIFYING"
     SPRINT = "SPRINT"
+    SPRINT_1 = "SPRINT_1"
+    SPRINT_2 = "SPRINT_2"
     FEATURE = "FEATURE"
 
 
