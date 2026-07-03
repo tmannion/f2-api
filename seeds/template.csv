@@ -1,4 +1,0 @@
-season_year,round_number,round_name,circuit_name,city,country,timezone,session_type,driver_number,first_name,last_name,nationality,team,grid_position,finish_position,status,points,has_fastest_lap,fastest_lap_time
-2026,1,Melbourne Round,Albert Park Circuit,Melbourne,Australia,Australia/Melbourne,QUALIFYING,7,Dino,Beganovic,Swedish,DAMS Lucas Oil,,1,FINISHED,0,false,
-2026,1,Melbourne Round,Albert Park Circuit,Melbourne,Australia,Australia/Melbourne,SPRINT,2,Joshua,Dürksen,Paraguayan,Invicta Racing,2,1,FINISHED,10,false,
-2026,1,Melbourne Round,Albert Park Circuit,Melbourne,Australia,Australia/Melbourne,FEATURE,6,Nikola,Tsolov,Bulgarian,Campos Racing,5,1,FINISHED,25,false,
