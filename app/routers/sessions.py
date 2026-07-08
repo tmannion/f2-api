@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.auth import require_api_key
 from app.database import get_db
 from app.schemas.f2 import SessionCreate, SessionResponse
 from app.schemas.pagination import PaginatedResponse
@@ -29,7 +30,11 @@ def get_session(session_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=SessionResponse, status_code=201)
-def create_session(session_data: SessionCreate, db: Session = Depends(get_db)):
+def create_session(
+    session_data: SessionCreate,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_api_key),
+):
     round_obj = crud.get_round(db, session_data.round_id)
     if round_obj is None:
         raise HTTPException(status_code=404, detail="Round not found")

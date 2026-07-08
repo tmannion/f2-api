@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.auth import require_api_key
 from app.database import get_db
 from app.schemas.f2 import TeamCreate, TeamResponse
 from app.schemas.pagination import PaginatedResponse
@@ -28,5 +29,9 @@ def get_team(team_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=TeamResponse, status_code=201)
-def create_team(team_data: TeamCreate, db: Session = Depends(get_db)):
+def create_team(
+    team_data: TeamCreate,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_api_key),
+):
     return crud.create_team(db, team_data)

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.auth import require_api_key
 from app.database import get_db
 from app.schemas.f2 import RoundCreate, RoundResponse
 from app.schemas.pagination import PaginatedResponse
@@ -29,7 +30,11 @@ def get_round(round_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=RoundResponse, status_code=201)
-def create_round(round_data: RoundCreate, db: Session = Depends(get_db)):
+def create_round(
+    round_data: RoundCreate,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_api_key),
+):
     season = crud.get_season(db, round_data.season_id)
     if season is None:
         raise HTTPException(status_code=404, detail="Season not found")

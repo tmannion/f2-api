@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.auth import require_api_key
 from app.database import get_db
 from app.schemas.f2 import ResultCreate, ResultResponse, PenaltyCreate, PenaltyResponse
 from app.schemas.pagination import PaginatedResponse
@@ -32,7 +33,11 @@ def get_result(result_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=ResultResponse, status_code=201)
-def create_result(result_data: ResultCreate, db: Session = Depends(get_db)):
+def create_result(
+    result_data: ResultCreate,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_api_key),
+):
     session = crud.get_session(db, result_data.session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -66,7 +71,10 @@ def list_penalties(
 
 @router.post("/{result_id}/penalties", response_model=PenaltyResponse, status_code=201)
 def create_penalty(
-    result_id: int, penalty_data: PenaltyCreate, db: Session = Depends(get_db)
+    result_id: int,
+    penalty_data: PenaltyCreate,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_api_key),
 ):
     result = crud.get_result(db, result_id)
     if result is None:

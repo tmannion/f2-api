@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.auth import require_api_key
 from app.database import get_db
 from app.schemas.f2 import SeasonCreate, SeasonResponse
 from app.schemas.pagination import PaginatedResponse
@@ -28,7 +29,11 @@ def get_season(season_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=SeasonResponse, status_code=201)
-def create_season(season: SeasonCreate, db: Session = Depends(get_db)):
+def create_season(
+    season: SeasonCreate,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_api_key),
+):
     existing = crud.get_season_by_year(db, season.year)
     if existing:
         raise HTTPException(
