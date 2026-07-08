@@ -7,7 +7,12 @@ from app.routers import api_v1_router
 
 app = FastAPI(
     title="F2 API",
-    description="Formula 2 standings, schedule, and results",
+    description=(
+        "REST API for FIA Formula 2 Championship data including "
+        "standings, race schedules, session results, and driver/team information.\n\n"
+        "**Public endpoints** (GET) require no authentication.\n\n"
+        "**Write endpoints** (POST) require an API key via the `X-API-Key` header."
+    ),
     version="dev",
 )
 
