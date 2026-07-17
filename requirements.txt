@@ -4,3 +4,6 @@ sqlalchemy
 pydantic
 ruff
 requests
+pytest
+httpx2
+pytest-cov

@@ -19,4 +19,4 @@ data/*.db
 # OS
 .DS_Store
 
-SETUP.md
+.coverage
