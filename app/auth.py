@@ -1,14 +1,17 @@
 """
 Simple API key authentication for write endpoints.
 
-The API key is read from the F2_API_KEY environment variable.
+The API key is read from the F2_API_KEY environment variable (loaded from .env file).
 Clients pass it via the X-API-Key header on POST requests.
 """
 
 import os
 
+from dotenv import load_dotenv
 from fastapi import HTTPException, Security
 from fastapi.security import APIKeyHeader
+
+load_dotenv()
 
 API_KEY = os.environ.get("F2_API_KEY", "")
 

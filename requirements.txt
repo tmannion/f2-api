@@ -7,3 +7,4 @@ requests
 pytest
 httpx2
 pytest-cov
+python-dotenv
