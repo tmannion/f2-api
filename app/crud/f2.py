@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import case, func
 from sqlalchemy.orm import Session as DBSession
 
 from app.models.f2 import (
@@ -318,16 +318,12 @@ def get_standings(db: DBSession, season_id: int) -> list[dict]:
             Driver.last_name,
             Team.name.label("team_name"),
             func.sum(Result.points).label("points"),
-            func.sum(func.case((Result.finish_position == 1, 1), else_=0)).label(
-                "wins"
-            ),
-            func.sum(func.case((Result.finish_position <= 3, 1), else_=0)).label(
-                "podiums"
-            ),
+            func.sum(case((Result.finish_position == 1, 1), else_=0)).label("wins"),
+            func.sum(case((Result.finish_position <= 3, 1), else_=0)).label("podiums"),
         )
         .join(Driver, Result.driver_id == Driver.id)
         .join(Team, Result.team_id == Team.id)
-        .filter(Result.session_id.in_(season_sessions))
+        .filter(Result.session_id.in_(season_sessions.select()))
         .group_by(Result.driver_id, Driver.first_name, Driver.last_name, Team.name)
         .order_by(func.sum(Result.points).desc())
         .all()
